@@ -1,4 +1,5 @@
 <img src="./assets/logo.jpeg" width="180"/>
+
 # tira-time
 
 Trabalho de Engenharia de Software. Membros da equipe: 
