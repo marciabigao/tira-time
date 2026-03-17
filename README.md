@@ -1,4 +1,5 @@
 # tira-time
+<img src="./assets/logo.jpeg" width="120"/>
 
 Trabalho de Engenharia de Software. Membros da equipe: 
 - Márcia Bigão Drummond - Fullstack
