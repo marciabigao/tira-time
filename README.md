@@ -22,8 +22,5 @@ Histórias de usuário:
 - UH 2: Como usuário, quero ser capaz de atualizar um jogador e seus atributos, para poder registrar evolução de suas habilidades e trocas de posição. 
 - UH 3: Como usuário, quero ser capaz de excluir um jogador, para que ele não possa ser adicionado em futuras partidas. 
 - UH 4: Como usuário, quero ser capaz de visualizar um jogador, para poder conferir suas informações. 
-- UH 5: Como usuário, quero ser capaz de criar uma partida, atribuindo a ela um nome, uma data, um local, os jogadores e o esporte (futebol ou vôlei), para sortear os times para ela.
-- UH 6: Como usuário, quero ser capaz de atualizar uma partida, de forma a registrar eventuais mudanças em sua organização.
-- UH 7: Como usuário, quero ser capaz de excluir uma partida, para tratar eventuais cancelamentos.
-- UH 8: Como usuário, quero ser capaz de visualizar uma partida, pde forma a conferir suas informações.
-- UH 9: Como usuário, quero ser capaz de sortear os times de uma determinada partida, de forma a equilibrar o nível de habilidade entre eles.
+- UH 5: Como usuário, quero ser capaz de sortear os times de uma determinada partida, de forma a equilibrar o nível de habilidade entre eles.
+- UH 6: Como usuário, quero ser capaz de baixar um pdf contendo os times sorteados, para que eu possa compartilhar com os demais participantes do jogo. 
