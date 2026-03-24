@@ -1,18 +1,11 @@
 import 'dotenv/config.js';
 import express from 'express';
 import pkg from '@prisma/client';
-import sqlite3 from 'better-sqlite3';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 const { PrismaClient } = pkg;
 
 const app = express();
-const client = new sqlite3('./dev.db');
-const adapter = new PrismaBetterSqlite3(client);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 app.use(express.json());
 
@@ -40,12 +33,34 @@ app.post('/players', async (req, res) => {
         },} )
     res.status(201).json(newPlayer);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao criar jogador.' });
+    console.error('Erro ao criar jogador:', error);
+    res.status(500).json({ error: 'Erro ao criar jogador.', details: error.message });
   }
 
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Porta ${PORT} já está em uso`);
+  } else {
+    console.error('Erro ao iniciar servidor:', err);
+  }
+  process.exit(1);
+});
+
+process.on('SIGINT', () => {
+  console.log('\nEncerrando servidor...');
+  server.close(() => {
+    prisma.$disconnect().then(() => {
+      console.log('Servidor encerrado');
+      process.exit(0);
+    });
+  });
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Promise rejection não tratada:', reason);
 });
