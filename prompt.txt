@@ -20,7 +20,15 @@ O sistema deve contemplar as seguintes funcionalidades principais:
 
 - Algoritmo de Sorteio: O coração do sistema é um sorteio que equilibra o nível técnico dos times com base nas notas dos jogadores.
 
+O sistema funciona da seguinte forma: ao acessar a aplicação, o usuário pode criar uma nova partida e associar atletas a ela, conforme definido nas histórias de usuário do README. Os atletas cadastrados permanecem armazenados no sistema com suas respectivas informações (nome, posição e nível técnico de 1 a 5 estrelas), permitindo reutilização rápida em partidas futuras. Caso necessário, o usuário também pode cadastrar novos atletas durante a criação da partida.
+
+Cada atleta deve possuir a classificação de posição Goleiro ou Linha, pois o algoritmo de sorteio deve garantir a distribuição equilibrada dos goleiros entre os times antes de distribuir os demais jogadores. No momento da criação da partida, o usuário deve selecionar a quantidade de times (entre 2 e 4), e o sistema deve executar o algoritmo de balanceamento com base no nível técnico dos atletas.
+
+Após o sorteio, o sistema deve apresentar uma tela com a composição final dos times, exibindo claramente os jogadores de cada equipe e suas respectivas posições. Além disso, deve existir uma funcionalidade de exportação em PDF para facilitar o compartilhamento dos times com os participantes da partida.
+
+A implementação deve ser incremental, com cada funcionalidade sendo construída em pequenos passos, bem definidos e orientados, garantindo organização, rastreabilidade e commits pequenos e revisáveis.
+
 Para começarmos ==================================================================================
 
 Para começarmos, analise as tecnologias escolhidas (React, Tailwind, Node, Prisma, SQLite) e me ajude a criar a estrutura do diretório.
-Você deve trabalhar passo-a-passo, com uma pasta para API, pasta client ( vite, JS, React, Tailwind), alem da Backend. Além disso, você deve orientar sobre as instalações. 
+Você deve trabalhar passo-a-passo, com uma pasta para API, pasta client ( vite, JS, React, Tailwind). Além disso, você deve orientar sobre as instalações. 
