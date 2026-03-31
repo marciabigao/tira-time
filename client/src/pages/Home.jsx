@@ -1,7 +1,10 @@
+import { useNavigate } from "react-router-dom";
+
 function Home() {
+    const navigate = useNavigate();
+
     const handleStart = () => {
-      // Depois vamos trocar por navegação (ex: para /players ou /match/new)
-      console.log("Começar clicado");
+        navigate("/match");
     };
   
     return (
