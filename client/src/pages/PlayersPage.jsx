@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout.jsx";
 import { playersMock } from "../mocks/playersMock.js";
 import PlayerCard from "../components/players/PlayerCard.jsx";
 import AddPlayerModal from "../components/players/AddPlayerModal.jsx";
+import DeletePlayerModal from "../components/players/DeletePlayerModal.jsx";
 
 const SORT_OPTIONS = {
   NAME: "name",
@@ -14,6 +15,7 @@ function PlayersPage() {
   const [players, setPlayers] = useState([]);
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.NAME);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [playerToDelete, setPlayerToDelete] = useState(null);
 
   // Carrega mock ao montar
   useEffect(() => {
@@ -56,6 +58,14 @@ function PlayersPage() {
     setPlayers((current) => [...current, newPlayer]);
   };
 
+  const handleConfirmDelete = () => {
+    if (!playerToDelete) return;
+    setPlayers((current) =>
+      current.filter((p) => p.id !== playerToDelete.id)
+    );
+    setPlayerToDelete(null);
+  };
+
   return (
     <MainLayout>
       <div className="flex items-center justify-between mb-4">
@@ -64,7 +74,7 @@ function PlayersPage() {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center rounded-md bg-red-400 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+          className="inline-flex items-center rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
         >
           + Adicionar jogador
         </button>
@@ -93,7 +103,7 @@ function PlayersPage() {
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          Habilidade
+          Habilidade (★)
         </button>
         <button
           type="button"
@@ -116,7 +126,11 @@ function PlayersPage() {
       ) : (
         <div className="space-y-2">
           {sortedPlayers.map((player) => (
-            <PlayerCard key={player.id} player={player} />
+            <PlayerCard
+              key={player.id}
+              player={player}
+              onDeleteClick={() => setPlayerToDelete(player)}
+            />
           ))}
         </div>
       )}
@@ -126,6 +140,14 @@ function PlayersPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddPlayer}
+      />
+
+      {/* Modal de exclusão de jogador */}
+      <DeletePlayerModal
+        isOpen={!!playerToDelete}
+        player={playerToDelete}
+        onClose={() => setPlayerToDelete(null)}
+        onConfirm={handleConfirmDelete}
       />
     </MainLayout>
   );
