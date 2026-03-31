@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout.jsx";
-
-const API_BASE_URL = "http://localhost:3000";
+import { playersMock } from "../mocks/playersMock.js";
 
 function MatchPage() {
   const [matchName, setMatchName] = useState("");
@@ -11,40 +10,16 @@ function MatchPage() {
 
   const [players, setPlayers] = useState([]);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
-  const [isLoadingPlayers, setIsLoadingPlayers] = useState(false);
-  const [playersError, setPlayersError] = useState("");
 
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Carregar jogadores da API ao montar a página
+  // Carregar jogadores do mock ao montar a página
   useEffect(() => {
-    const fetchPlayers = async () => {
-      setIsLoadingPlayers(true);
-      setPlayersError("");
-      try {
-        const response = await fetch(`${API_BASE_URL}/players`);
-        if (!response.ok) {
-          throw new Error("Falha ao carregar jogadores");
-        }
-        const data = await response.json();
-
-        // Ordenar alfabeticamente por nome (garantia extra além do backend)
-        const sorted = [...data].sort((a, b) =>
-          a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
-        );
-        setPlayers(sorted);
-      } catch (err) {
-        console.error(err);
-        setPlayersError(
-          "Não foi possível carregar a lista de jogadores. Tente novamente mais tarde."
-        );
-      } finally {
-        setIsLoadingPlayers(false);
-      }
-    };
-
-    fetchPlayers();
+    const sorted = [...playersMock].sort((a, b) =>
+      a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+    );
+    setPlayers(sorted);
   }, []);
 
   const togglePlayerSelection = (playerId) => {
@@ -60,7 +35,6 @@ function MatchPage() {
     setFormError("");
     setSuccessMessage("");
 
-    // Validações simples
     if (!matchName.trim()) {
       setFormError("O nome da partida é obrigatório.");
       return;
@@ -82,12 +56,11 @@ function MatchPage() {
       return;
     }
 
-    // Por enquanto só simulamos a criação da partida (UI)
     const selectedPlayers = players.filter((p) =>
       selectedPlayerIds.includes(p.id)
     );
 
-    console.log("Partida criada (UI):", {
+    console.log("Partida criada (UI - mock):", {
       matchName,
       matchDate,
       teamsCount: Number(teamsCount),
@@ -95,19 +68,13 @@ function MatchPage() {
       players: selectedPlayers,
     });
 
-    setSuccessMessage("Partida configurada com sucesso (apenas UI por enquanto).");
-
-    // Opcional: limpar o formulário
-    // setMatchName("");
-    // setMatchDate("");
-    // setTeamsCount("2");
-    // setLocation("");
-    // setSelectedPlayerIds([]);
+    setSuccessMessage(
+      "Partida configurada com sucesso usando jogadores mock (apenas UI)."
+    );
   };
 
   return (
     <MainLayout>
-      {/* Container que centraliza o card na tela, inclusive em desktop */}
       <div className="min-h-[calc(100vh-56px)] flex items-center justify-center">
         <div className="w-full max-w-3xl">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
@@ -190,29 +157,21 @@ function MatchPage() {
                 </div>
               </div>
 
-              {/* Seção de seleção de jogadores */}
+              {/* Seção de seleção de jogadores (mock) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-gray-900">
-                    Jogadores da partida
+                    Jogadores da partida (mock)
                   </h2>
                   <span className="text-xs text-gray-500">
                     {selectedPlayerIds.length} selecionado(s)
                   </span>
                 </div>
 
-                {playersError && (
-                  <p className="text-xs text-red-600">{playersError}</p>
-                )}
-
                 <div className="border border-gray-200 rounded-md max-h-60 overflow-y-auto">
-                  {isLoadingPlayers ? (
+                  {players.length === 0 ? (
                     <div className="p-3 text-sm text-gray-500">
-                      Carregando jogadores...
-                    </div>
-                  ) : players.length === 0 ? (
-                    <div className="p-3 text-sm text-gray-500">
-                      Nenhum jogador cadastrado ainda.
+                      Nenhum jogador mock encontrado.
                     </div>
                   ) : (
                     <ul className="divide-y divide-gray-100">
@@ -254,7 +213,6 @@ function MatchPage() {
                 </div>
               </div>
 
-              {/* Mensagens de erro/sucesso */}
               {formError && (
                 <p className="text-sm text-red-600">{formError}</p>
               )}
@@ -262,12 +220,11 @@ function MatchPage() {
                 <p className="text-sm text-green-600">{successMessage}</p>
               )}
 
-              {/* Botão principal */}
               <button
                 type="submit"
                 className="w-full sm:w-auto mt-2 inline-flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 transition-colors"
               >
-                Criar partida (UI)
+                Criar partida (mock)
               </button>
             </form>
           </div>
