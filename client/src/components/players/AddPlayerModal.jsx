@@ -87,11 +87,11 @@ function AddPlayerModal({ isOpen, onClose, onAdd }) {
                 onChange={(e) => setAbility(e.target.value)}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
               >
-                <option value="1">1 - Iniciante</option>
-                <option value="2">2</option>
-                <option value="3">3 - Intermediário</option>
-                <option value="4">4</option>
-                <option value="5">5 - Avançado</option>
++                <option value="1">★☆☆☆☆ (1)</option>
++                <option value="2">★★☆☆☆ (2)</option>
++                <option value="3">★★★☆☆ (3)</option>
++                <option value="4">★★★★☆ (4)</option>
++                <option value="5">★★★★★ (5)</option>
               </select>
             </div>
 
