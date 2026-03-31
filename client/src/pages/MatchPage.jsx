@@ -36,23 +36,23 @@ function MatchPage() {
     setSuccessMessage("");
 
     if (!matchName.trim()) {
-      setFormError("O nome da partida é obrigatório.");
+      setFormError("O nome da partida é obrigatório");
       return;
     }
     if (!matchDate) {
-      setFormError("A data da partida é obrigatória.");
+      setFormError("A data da partida é obrigatória");
       return;
     }
     if (!location.trim()) {
-      setFormError("O local da partida é obrigatório.");
+      setFormError("O local da partida é obrigatório");
       return;
     }
     if (!teamsCount || Number(teamsCount) < 2 || Number(teamsCount) > 4) {
-      setFormError("A quantidade de times deve ser entre 2 e 4.");
+      setFormError("A quantidade de times deve ser entre 2 e 4");
       return;
     }
     if (selectedPlayerIds.length === 0) {
-      setFormError("Selecione pelo menos um jogador para a partida.");
+      setFormError("Selecione pelo menos um jogador para a partida");
       return;
     }
 
@@ -69,7 +69,7 @@ function MatchPage() {
     });
 
     setSuccessMessage(
-      "Partida configurada com sucesso usando jogadores mock (apenas UI)."
+      "Partida criada com sucesso"
     );
   };
 
@@ -176,7 +176,9 @@ function MatchPage() {
                   ) : (
                     <ul className="divide-y divide-gray-100">
                       {players.map((player) => {
-                        const isSelected = selectedPlayerIds.includes(player.id);
+                        const isSelected = selectedPlayerIds.includes(
+                          player.id
+                        );
                         return (
                           <li
                             key={player.id}
@@ -213,19 +215,26 @@ function MatchPage() {
                 </div>
               </div>
 
-              {formError && (
-                <p className="text-sm text-red-600">{formError}</p>
-              )}
-              {successMessage && (
-                <p className="text-sm text-green-600">{successMessage}</p>
-              )}
+              {/* Mensagem + botão, com distâncias controladas */}
+              <div className="flex flex-col space-y-1 mt-4">
+                <div className="min-h-[1.25rem]">
+                  {formError && (
+                    <p className="text-sm text-red-600">{formError}</p>
+                  )}
+                  {!formError && successMessage && (
+                    <p className="text-sm text-green-600">
+                      {successMessage}
+                    </p>
+                  )}
+                </div>
 
-              <button
-                type="submit"
-                className="w-full sm:w-auto mt-2 inline-flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 transition-colors"
-              >
-                Criar partida (mock)
-              </button>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 transition-colors"
+                >
+                  Criar partida (mock)
+                </button>
+              </div>
             </form>
           </div>
         </div>
