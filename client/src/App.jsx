@@ -1,8 +1,11 @@
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home.jsx";
+
 function App() {
   return (
-    <div className="text-red-500 text-3xl">
-      O JOÃO É MUITO LINDOOO
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+    </Routes>
   );
 }
 
