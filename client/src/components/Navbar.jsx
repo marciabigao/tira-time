@@ -10,8 +10,12 @@ function Navbar() {
 
   return (
     <nav className="w-full border-b border-gray-200 bg-white">
-      <div className="max-w-5xl mx-auto px-4 flex items-center justify-between h-14">
-        <span className="font-bold text-lg text-gray-900">Tira-Time</span>
+      <div className="max-w-5xl mx-auto flex items-center justify-between h-14">
+        <img
+            src="/public/assets/logo-removebg-preview.png"
+            alt="Tira-Time"
+            className="w-28 h-auto"
+        />
 
         <div className="flex items-center gap-2">
           <NavLink
