@@ -1,8 +1,20 @@
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home.jsx";
+import MatchPage from "./pages/MatchPage.jsx";
+import PlayersPage from "./pages/PlayersPage.jsx";
+
 function App() {
   return (
-    <div className="text-red-500 text-3xl">
-      O JOÃO É MUITO LINDOOO
-    </div>
+    <Routes>
+      {/* Tela inicial (logo + botão) */}
+      <Route path="/" element={<Home />} />
+
+      {/* Tela de partida (com navbar) */}
+      <Route path="/match" element={<MatchPage />} />
+
+      {/* Tela de jogadores (com navbar) */}
+      <Route path="/players" element={<PlayersPage />} />
+    </Routes>
   );
 }
 
