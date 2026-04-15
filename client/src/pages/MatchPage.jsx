@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout.jsx";
 import { playersMock } from "../mocks/playersMock.js";
+import StarRating from "../components/StarRating.jsx";
 
 function MatchPage() {
   const [matchName, setMatchName] = useState("");
@@ -201,11 +202,14 @@ function MatchPage() {
                                 {player.name}
                               </span>
                             </div>
-                            <span className="text-xs text-gray-500">
-                              Habilidade: {player.ability} •{" "}
-                              {player.position === "GoalKeeper"
-                                ? "Goleiro"
-                                : "Linha"}
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <StarRating value={player.ability} />
+                              <span>
+                                •{" "}
+                                {player.position === "GoalKeeper"
+                                  ? "Goleiro"
+                                  : "Linha"}
+                              </span>
                             </span>
                           </li>
                         );
