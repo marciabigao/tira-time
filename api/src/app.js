@@ -2,6 +2,7 @@ import 'dotenv/config.js';
 import express from 'express';
 import pkg from '@prisma/client';
 import cors from 'cors';
+import PDFDocument from 'pdfkit';
 
 const { PrismaClient } = pkg;
 
@@ -12,6 +13,52 @@ app.use(cors());
 app.use(express.json());
 
 const allowedPositions = ['GoalKeeper', 'FieldPlayer'];
+
+app.post('/generate-pdf', (req, res) => {
+  const { teams, matchInfo } = req.body;
+
+  if (!teams || !matchInfo) {
+    return res.status(400).json({ error: 'Dados dos times e da partida são obrigatórios.' });
+  }
+
+  const doc = new PDFDocument({ margin: 50 });
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=times.pdf');
+
+  doc.pipe(res);
+
+  doc.fontSize(20).font('Helvetica-Bold').text(matchInfo.name, { align: 'center' });
+  doc.fontSize(12).font('Helvetica').text(`${matchInfo.location} - ${new Date(matchInfo.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`, { align: 'center' });
+  doc.moveDown(2);
+
+  const teamNames = ["Time Vermelho", "Time Azul", "Time Verde", "Time Amarelo"];
+  const teamTextColors = ['#991B1B', '#1E40AF', '#065F46', '#92400E'];
+
+  teams.forEach((team, index) => {
+    const textColor = teamTextColors[index % teamTextColors.length];
+    const teamName = teamNames[index % teamNames.length];
+
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(textColor).text(teamName);
+    doc.fontSize(10).font('Helvetica').text(`Habilidade Total: ${team.totalAbility}`);
+    doc.moveDown(0.5);
+
+    team.players.forEach(player => {
+      doc.fontSize(12).font(player.position === 'GoalKeeper' ? 'Helvetica-Bold' : 'Helvetica').fillColor('black');
+      
+      // --- ALTERAÇÃO APLICADA AQUI ---
+      const playerLabel = `${player.name} - Habilidade: ${player.ability}`;
+      // --- FIM DA ALTERAÇÃO ---
+
+      const positionLabel = player.position === 'GoalKeeper' ? ' (Goleiro)' : '';
+      doc.text(playerLabel + positionLabel);
+    });
+
+    doc.moveDown(2);
+  });
+
+  doc.end();
+});
 
 
 app.post('/draw-teams', async (req, res) => {
@@ -34,42 +81,30 @@ app.post('/draw-teams', async (req, res) => {
     let goalkeepers = players.filter(p => p.position === 'GoalKeeper');
     const fieldPlayers = players.filter(p => p.position === 'FieldPlayer');
 
-    // --- LÓGICA DE GOLEIROS ATUALIZADA ---
-
-    // Validação 1: Menos goleiros que times
     if (goalkeepers.length < teamsCount) {
       return res.status(400).json({
         error: `Para formar ${teamsCount} times, você deve selecionar pelo menos ${teamsCount} goleiros. Você selecionou ${goalkeepers.length}.`,
       });
     }
 
-    // Validação 2: Mais goleiros que times (ajuste automático)
     if (goalkeepers.length > teamsCount) {
-      // Ordena goleiros pela habilidade (do pior para o melhor)
       goalkeepers.sort((a, b) => a.ability - b.ability);
       
       const goalkeepersToRelegateCount = goalkeepers.length - teamsCount;
       const relegatedGoalkeepersRaw = goalkeepers.splice(0, goalkeepersToRelegateCount);
       
-      // Mapeia os goleiros rebaixados para novos objetos com a posição alterada
       const relegatedGoalkeepersAsFieldPlayers = relegatedGoalkeepersRaw.map(player => ({
         ...player,
-        position: 'FieldPlayer', // Altera a posição para a lógica do sorteio
+        position: 'FieldPlayer',
       }));
       
-      // Adiciona os goleiros "rebaixados" à lista de jogadores de linha
       fieldPlayers.push(...relegatedGoalkeepersAsFieldPlayers);
     }
     
-    // --- FIM DA ATUALIZAÇÃO ---
-
-    // Ordena jogadores de linha por habilidade (do maior para o menor)
     fieldPlayers.sort((a, b) => b.ability - a.ability);
 
-    // Embaralha os goleiros para distribuição aleatória
     goalkeepers.sort(() => Math.random() - 0.5);
 
-    // Inicializa os times, cada um com um goleiro
     const teams = Array.from({ length: teamsCount }, (_, i) => {
       const goalkeeper = goalkeepers[i];
       return {
@@ -79,9 +114,7 @@ app.post('/draw-teams', async (req, res) => {
       };
     });
 
-    // Distribui os jogadores de linha usando o algoritmo "cobra"
     fieldPlayers.forEach(player => {
-      // Encontra o time com a menor habilidade total no momento
       teams.sort((a, b) => a.totalAbility - b.totalAbility);
       const targetTeam = teams[0];
       
@@ -89,12 +122,11 @@ app.post('/draw-teams', async (req, res) => {
       targetTeam.totalAbility += player.ability;
     });
 
-    // Ordena os jogadores dentro de cada time para a exibição no front
     teams.forEach(team => {
       team.players.sort((a, b) => {
-        if (a.position === 'GoalKeeper') return -1; // Goleiro sempre primeiro
+        if (a.position === 'GoalKeeper') return -1;
         if (b.position === 'GoalKeeper') return 1;
-        return b.ability - a.ability; // Jogadores por habilidade
+        return b.ability - a.ability;
       });
     });
 
