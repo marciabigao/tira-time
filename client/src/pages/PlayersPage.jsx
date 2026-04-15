@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout.jsx";
 import PlayerCard from "../components/players/PlayerCard.jsx";
 import AddPlayerModal from "../components/players/AddPlayerModal.jsx";
 import DeletePlayerModal from "../components/players/DeletePlayerModal.jsx";
+import EditPlayerModal from "../components/players/EditPlayerModal.jsx";
 import { api } from "../services/api.js";
 
 const SORT_OPTIONS = {
@@ -16,6 +17,7 @@ function PlayersPage() {
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.NAME);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [playerToDelete, setPlayerToDelete] = useState(null);
+  const [playerToEdit, setPlayerToEdit] = useState(null);
 
   // Carrega jogadores da API ao montar
   useEffect(() => {
@@ -60,7 +62,18 @@ function PlayersPage() {
       setPlayers((current) => [...current, newPlayer]);
     } catch (err) {
       console.error("Falha ao criar jogador:", err);
-      // Aqui você poderia mostrar um erro na UI
+    }
+  };
+
+  const handleUpdatePlayer = async (id, playerData) => {
+    try {
+      const updatedPlayer = await api.updatePlayer(id, playerData);
+      setPlayers((current) =>
+        current.map((p) => (p.id === id ? updatedPlayer : p))
+      );
+      setPlayerToEdit(null);
+    } catch (err) {
+      console.error("Falha ao atualizar jogador:", err);
     }
   };
 
@@ -74,7 +87,6 @@ function PlayersPage() {
       setPlayerToDelete(null);
     } catch (err) {
       console.error("Falha ao deletar jogador:", err);
-      // Aqui você poderia mostrar um erro na UI
     }
   };
 
@@ -141,6 +153,7 @@ function PlayersPage() {
             <PlayerCard
               key={player.id}
               player={player}
+              onEditClick={() => setPlayerToEdit(player)} // <-- ESTA LINHA ESTAVA FALTANDO
               onDeleteClick={() => setPlayerToDelete(player)}
             />
           ))}
@@ -152,6 +165,14 @@ function PlayersPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddPlayer}
+      />
+
+      {/* Modal de edição de jogador */}
+      <EditPlayerModal
+        isOpen={!!playerToEdit}
+        onClose={() => setPlayerToEdit(null)}
+        onUpdate={handleUpdatePlayer}
+        player={playerToEdit}
       />
 
       {/* Modal de exclusão de jogador */}
