@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import MainLayout from "../layouts/MainLayout.jsx";
-import { playersMock } from "../mocks/playersMock.js";
 import PlayerCard from "../components/players/PlayerCard.jsx";
 import AddPlayerModal from "../components/players/AddPlayerModal.jsx";
 import DeletePlayerModal from "../components/players/DeletePlayerModal.jsx";
+import { api } from "../services/api.js";
 
 const SORT_OPTIONS = {
   NAME: "name",
@@ -17,34 +17,30 @@ function PlayersPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [playerToDelete, setPlayerToDelete] = useState(null);
 
-  // Carrega mock ao montar
+  // Carrega jogadores da API ao montar
   useEffect(() => {
-    setPlayers(playersMock);
+    api.getPlayers()
+      .then(setPlayers)
+      .catch(err => console.error("Falha ao buscar jogadores:", err));
   }, []);
 
   const sortedPlayers = useMemo(() => {
     const copy = [...players];
     switch (sortBy) {
       case SORT_OPTIONS.ABILITY:
-        // habilidade desc, depois nome
         return copy.sort((a, b) => {
           if (b.ability !== a.ability) {
             return b.ability - a.ability;
           }
-          return a.name.localeCompare(b.name, "pt-BR", {
-            sensitivity: "base",
-          });
+          return a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" });
         });
       case SORT_OPTIONS.POSITION:
-        // Goleiro antes, depois linha, e dentro de cada grupo por nome
         return copy.sort((a, b) => {
           if (a.position !== b.position) {
             if (a.position === "GoalKeeper") return -1;
             if (b.position === "GoalKeeper") return 1;
           }
-          return a.name.localeCompare(b.name, "pt-BR", {
-            sensitivity: "base",
-          });
+          return a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" });
         });
       case SORT_OPTIONS.NAME:
       default:
@@ -54,16 +50,32 @@ function PlayersPage() {
     }
   }, [players, sortBy]);
 
-  const handleAddPlayer = (newPlayer) => {
-    setPlayers((current) => [...current, newPlayer]);
+  const handleAddPlayer = async (playerData) => {
+    try {
+      const newPlayer = await api.createPlayer({
+        name: playerData.name,
+        ability: playerData.ability,
+        position: playerData.position,
+      });
+      setPlayers((current) => [...current, newPlayer]);
+    } catch (err) {
+      console.error("Falha ao criar jogador:", err);
+      // Aqui você poderia mostrar um erro na UI
+    }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!playerToDelete) return;
-    setPlayers((current) =>
-      current.filter((p) => p.id !== playerToDelete.id)
-    );
-    setPlayerToDelete(null);
+    try {
+      await api.deletePlayer(playerToDelete.id);
+      setPlayers((current) =>
+        current.filter((p) => p.id !== playerToDelete.id)
+      );
+      setPlayerToDelete(null);
+    } catch (err) {
+      console.error("Falha ao deletar jogador:", err);
+      // Aqui você poderia mostrar um erro na UI
+    }
   };
 
   return (
@@ -119,9 +131,9 @@ function PlayersPage() {
       </div>
 
       {/* Lista de jogadores */}
-      {sortedPlayers.length === 0 ? (
+      {players.length === 0 ? (
         <p className="text-sm text-gray-600">
-          Nenhum jogador cadastrado ainda.
+          Nenhum jogador cadastrado.
         </p>
       ) : (
         <div className="space-y-2">
