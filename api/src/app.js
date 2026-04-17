@@ -13,6 +13,100 @@ app.use(express.json());
 
 const allowedPositions = ['GoalKeeper', 'FieldPlayer'];
 
+
+app.post('/draw-teams', async (req, res) => {
+  const { playerIds, teamsCount } = req.body;
+
+  if (!playerIds || playerIds.length === 0) {
+    return res.status(400).json({ error: 'Nenhum jogador selecionado.' });
+  }
+  if (!teamsCount || teamsCount < 2) {
+    return res.status(400).json({ error: 'O número de times deve ser pelo menos 2.' });
+  }
+
+  try {
+    const players = await prisma.player.findMany({
+      where: {
+        id: { in: playerIds },
+      },
+    });
+
+    let goalkeepers = players.filter(p => p.position === 'GoalKeeper');
+    const fieldPlayers = players.filter(p => p.position === 'FieldPlayer');
+
+    // --- LÓGICA DE GOLEIROS ATUALIZADA ---
+
+    // Validação 1: Menos goleiros que times
+    if (goalkeepers.length < teamsCount) {
+      return res.status(400).json({
+        error: `Para formar ${teamsCount} times, você deve selecionar pelo menos ${teamsCount} goleiros. Você selecionou ${goalkeepers.length}.`,
+      });
+    }
+
+    // Validação 2: Mais goleiros que times (ajuste automático)
+    if (goalkeepers.length > teamsCount) {
+      // Ordena goleiros pela habilidade (do pior para o melhor)
+      goalkeepers.sort((a, b) => a.ability - b.ability);
+      
+      const goalkeepersToRelegateCount = goalkeepers.length - teamsCount;
+      const relegatedGoalkeepersRaw = goalkeepers.splice(0, goalkeepersToRelegateCount);
+      
+      // Mapeia os goleiros rebaixados para novos objetos com a posição alterada
+      const relegatedGoalkeepersAsFieldPlayers = relegatedGoalkeepersRaw.map(player => ({
+        ...player,
+        position: 'FieldPlayer', // Altera a posição para a lógica do sorteio
+      }));
+      
+      // Adiciona os goleiros "rebaixados" à lista de jogadores de linha
+      fieldPlayers.push(...relegatedGoalkeepersAsFieldPlayers);
+    }
+    
+    // --- FIM DA ATUALIZAÇÃO ---
+
+    // Ordena jogadores de linha por habilidade (do maior para o menor)
+    fieldPlayers.sort((a, b) => b.ability - a.ability);
+
+    // Embaralha os goleiros para distribuição aleatória
+    goalkeepers.sort(() => Math.random() - 0.5);
+
+    // Inicializa os times, cada um com um goleiro
+    const teams = Array.from({ length: teamsCount }, (_, i) => {
+      const goalkeeper = goalkeepers[i];
+      return {
+        name: `Time ${i + 1}`,
+        totalAbility: goalkeeper.ability,
+        players: [goalkeeper],
+      };
+    });
+
+    // Distribui os jogadores de linha usando o algoritmo "cobra"
+    fieldPlayers.forEach(player => {
+      // Encontra o time com a menor habilidade total no momento
+      teams.sort((a, b) => a.totalAbility - b.totalAbility);
+      const targetTeam = teams[0];
+      
+      targetTeam.players.push(player);
+      targetTeam.totalAbility += player.ability;
+    });
+
+    // Ordena os jogadores dentro de cada time para a exibição no front
+    teams.forEach(team => {
+      team.players.sort((a, b) => {
+        if (a.position === 'GoalKeeper') return -1; // Goleiro sempre primeiro
+        if (b.position === 'GoalKeeper') return 1;
+        return b.ability - a.ability; // Jogadores por habilidade
+      });
+    });
+
+    res.json(teams);
+
+  } catch (error) {
+    console.error('Erro ao sortear times:', error);
+    res.status(500).json({ error: 'Ocorreu um erro inesperado ao sortear os times.' });
+  }
+});
+
+
 app.post('/players', async (req, res) => {
   const { name, ability, position } = req.body;
 
@@ -73,7 +167,6 @@ app.put("/players/:id", async (req, res) => {
     const { id } = req.params;
     const { name, ability, position } = req.body;
 
-    // --- CORREÇÃO APLICADA AQUI ---
     if (name === undefined || ability === undefined || position === undefined) {
       return res.status(400).json({
         error: "name, ability e position são obrigatórios"
@@ -94,7 +187,6 @@ app.put("/players/:id", async (req, res) => {
         error: `position deve ser 'GoalKeeper' ou 'FieldPlayer'.`
       });
     }
-    // --- FIM DA CORREÇÃO ---
 
     const player = await prisma.player.update({
       where: { id },
@@ -102,7 +194,6 @@ app.put("/players/:id", async (req, res) => {
     });
     res.json(player);
   } catch (error) {
-    // Adiciona um log para o caso de o jogador não ser encontrado no update
     if (error.code === 'P2025') {
         return res.status(404).json({ error: "Jogador não encontrado para atualização." });
     }
