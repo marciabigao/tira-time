@@ -29,7 +29,9 @@ export const api = {
     getPlayers: () => request("/players"),
     createPlayer: (payload) =>
       request("/players", { method: "POST", body: JSON.stringify(payload) }),
-    updatePlayer: (id, payload) => // Adicionar esta linha
+    updatePlayer: (id, payload) =>
       request(`/players/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
     deletePlayer: (id) => request(`/players/${id}`, { method: "DELETE" }),
+    drawTeams: (payload) =>
+      request('/draw-teams', { method: 'POST', body: JSON.stringify(payload) }),
   };
