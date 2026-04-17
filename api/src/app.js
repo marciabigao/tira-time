@@ -1,27 +1,27 @@
 import 'dotenv/config.js';
 import express from 'express';
 import pkg from '@prisma/client';
+import cors from 'cors';
 
 const { PrismaClient } = pkg;
 
 const app = express();
 const prisma = new PrismaClient();
 
+app.use(cors());
 app.use(express.json());
 
-// Lista de Posições permitidas ( Goleiro ou Não Goleiro )
 const allowedPositions = ['GoalKeeper', 'FieldPlayer'];
 
 app.post('/players', async (req, res) => {
   const { name, ability, position } = req.body;
 
   if (!name || name.trim().length < 2) {
-  return res.status(400).json({
-    error: "name é obrigatório e deve ter pelo menos 2 caracteres"
-  });
-}
+    return res.status(400).json({
+      error: "name é obrigatório e deve ter pelo menos 2 caracteres"
+    });
+  }
 
-  // Validação de habilidade (1-5)
   if (typeof ability !== 'number' || ability < 1 || ability > 5) {
     return res.status(400).json({ error: 'A habilidade deve ser um número entre 1 e 5.' });
   }
@@ -32,29 +32,20 @@ app.post('/players', async (req, res) => {
 
   try {
     const newPlayer = await prisma.player.create({
-        data: {
-          name,
-          ability,
-          position,
-        },} )
+      data: { name, ability, position }
+    });
     res.status(201).json(newPlayer);
   } catch (error) {
     console.error('Erro ao criar jogador:', error);
     res.status(500).json({ error: 'Erro ao criar jogador.', details: error.message });
   }
-
 });
 
-// Get para todos jogadores
 app.get("/players", async (req, res) => {
   try {
     const players = await prisma.player.findMany({
-      orderBy:
-      {
-        name: "asc"
-      }     
-      });
-
+      orderBy: { name: "asc" }
+    });
     res.json(players);
   } catch (error) {
     console.error('Erro ao buscar jogadores:', error);
@@ -62,91 +53,77 @@ app.get("/players", async (req, res) => {
   }
 });
 
-// Get por ID
 app.get("/players/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
     const player = await prisma.player.findUnique({
-      where: {
-        id: id
-      }
+      where: { id }
     });
-
     if (!player) {
       return res.status(404).json({ error: "Jogador não encontrado" });
     }
-
     res.json(player);
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar jogador" });
   }
 });
 
-// PUT update player 
 app.put("/players/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { name, ability, position } = req.body;
 
-    if (!name || !ability || !position) {
+    // --- CORREÇÃO APLICADA AQUI ---
+    if (name === undefined || ability === undefined || position === undefined) {
       return res.status(400).json({
         error: "name, ability e position são obrigatórios"
       });
     }
-
-    if (!name || name.trim().length < 2) {
+    if (name.trim().length < 2) {
       return res.status(400).json({
-        error: "name é obrigatório e deve ter pelo menos 2 caracteres"
+        error: "name deve ter pelo menos 2 caracteres"
       });
     }
-
-    if (ability < 1 || ability > 5) {
+    if (typeof ability !== 'number' || ability < 1 || ability > 5) {
       return res.status(400).json({
-        error: "ability deve estar entre 1 e 5"
+        error: "ability deve ser um número entre 1 e 5"
       });
     }
-
     if (!allowedPositions.includes(position)) {
       return res.status(400).json({
-        error: `position deve ser uma das seguintes: ${allowedPositions.join(', ')}.`
+        error: `position deve ser 'GoalKeeper' ou 'FieldPlayer'.`
       });
     }
+    // --- FIM DA CORREÇÃO ---
 
     const player = await prisma.player.update({
-      where: {
-        id: id
-      },
-      data: {
-        name,
-        ability,
-        position
-      }
+      where: { id },
+      data: { name, ability, position }
     });
-
     res.json(player);
   } catch (error) {
+    // Adiciona um log para o caso de o jogador não ser encontrado no update
+    if (error.code === 'P2025') {
+        return res.status(404).json({ error: "Jogador não encontrado para atualização." });
+    }
     res.status(500).json({ error: "Erro ao atualizar jogador" });
   }
 });
 
-// DELETE player
 app.delete("/players/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
     await prisma.player.delete({
-      where: {
-        id: id
-      }
+      where: { id }
     });
-
     res.json({ message: "Jogador deletado com sucesso" });
   } catch (error) {
+    if (error.code === 'P2025') {
+        return res.status(404).json({ error: "Jogador não encontrado para exclusão." });
+    }
     res.status(500).json({ error: "Erro ao deletar jogador" });
   }
 });
-
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
