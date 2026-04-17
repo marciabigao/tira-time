@@ -1,11 +1,35 @@
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import StarRating from "../components/StarRating";
+import { api } from "../services/api";
 
 function TeamsResultPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { teams, matchInfo } = location.state || {};
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!teams || !matchInfo) return;
+    setIsDownloading(true);
+    try {
+      const pdfBlob = await api.generatePdf({ teams, matchInfo });
+      const url = window.URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `times-${matchInfo.name.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error("Falha ao baixar PDF:", error);
+      // Opcional: mostrar um erro para o usuário
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   if (!teams || !matchInfo) {
     return (
@@ -65,12 +89,19 @@ function TeamsResultPage() {
           ))}
         </div>
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
             <button
                 onClick={() => navigate("/match")}
-                className="rounded-md bg-gray-600 px-6 py-2 text-sm font-semibold text-white hover:bg-gray-700"
+                className="w-full sm:w-auto rounded-md bg-gray-600 px-6 py-2 text-sm font-semibold text-white hover:bg-gray-700"
             >
                 Sortear Nova Partida
+            </button>
+            <button
+                onClick={handleDownloadPdf}
+                disabled={isDownloading}
+                className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-blue-500 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-600 disabled:bg-gray-400"
+            >
+              {isDownloading ? "Baixando..." : "Baixar PDF"}
             </button>
         </div>
       </div>
