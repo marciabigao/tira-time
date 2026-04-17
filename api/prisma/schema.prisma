@@ -1,0 +1,15 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Player {
+  id       String  @id @default(uuid())
+  name     String
+  ability  Int     // Validação de 1-5 na aplicação
+  position String
+}
