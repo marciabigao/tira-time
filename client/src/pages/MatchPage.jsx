@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // 1. Importar useNavigate
 import MainLayout from "../layouts/MainLayout.jsx";
 import StarRating from "../components/StarRating.jsx";
 import { api } from "../services/api.js";
 
 function MatchPage() {
+  const navigate = useNavigate(); // 2. Inicializar o hook
   const [matchName, setMatchName] = useState("");
   const [matchDate, setMatchDate] = useState("");
   const [teamsCount, setTeamsCount] = useState("2");
@@ -13,7 +15,7 @@ function MatchPage() {
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
 
   const [formError, setFormError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Para feedback no botão
 
   useEffect(() => {
     api.getPlayers()
@@ -27,6 +29,7 @@ function MatchPage() {
   }, []);
 
   const togglePlayerSelection = (playerId) => {
+    setFormError(""); // Limpa o erro ao interagir
     setSelectedPlayerIds((current) =>
       current.includes(playerId)
         ? current.filter((id) => id !== playerId)
@@ -34,52 +37,57 @@ function MatchPage() {
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setFormError("");
-    setSuccessMessage("");
+    setIsLoading(true);
 
+    // Validações do formulário
     if (!matchName.trim()) {
       setFormError("O nome da partida é obrigatório");
+      setIsLoading(false);
       return;
     }
     if (!matchDate) {
       setFormError("A data da partida é obrigatória");
+      setIsLoading(false);
       return;
     }
-    if (!location.trim()) {
-      setFormError("O local da partida é obrigatório");
-      return;
-    }
-    if (!teamsCount || Number(teamsCount) < 2 || Number(teamsCount) > 4) {
-      setFormError("A quantidade de times deve ser entre 2 e 4");
-      return;
-    }
-    if (selectedPlayerIds.length === 0) {
-      setFormError("Selecione pelo menos um jogador para a partida");
+    if (selectedPlayerIds.length < Number(teamsCount)) {
+      setFormError(`Você precisa de pelo menos ${teamsCount} jogadores para formar ${teamsCount} times.`);
+      setIsLoading(false);
       return;
     }
 
-    const selectedPlayers = players.filter((p) =>
-      selectedPlayerIds.includes(p.id)
-    );
+    try {
+      const teams = await api.drawTeams({
+        playerIds: selectedPlayerIds,
+        teamsCount: Number(teamsCount),
+      });
 
-    console.log("Partida criada (UI - mock):", {
-      matchName,
-      matchDate,
-      teamsCount: Number(teamsCount),
-      location,
-      players: selectedPlayers,
-    });
+      // Navega para a página de resultados, passando os dados via state
+      navigate("/teams-result", {
+        state: {
+          teams: teams,
+          matchInfo: {
+            name: matchName,
+            date: matchDate,
+            location: location,
+          },
+        },
+      });
 
-    setSuccessMessage(
-      "Partida criada com sucesso"
-    );
+    } catch (error) {
+      // Exibe o erro da API para o usuário
+      setFormError(error.message || "Ocorreu um erro ao sortear os times.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <MainLayout>
-      <div className="min-h-[calc(100vh-56px)] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-56px)] flex items-center justify-center py-8">
         <div className="w-full max-w-3xl">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Criar Partida
@@ -88,6 +96,7 @@ function MatchPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
+                {/* Campos do formulário (Nome, Data, etc.) - sem alteração */}
                 <div>
                   <label
                     htmlFor="matchName"
@@ -163,7 +172,7 @@ function MatchPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-gray-900">
-                    Jogadores da partida
+                    Selecione os Jogadores
                   </h2>
                   <span className="text-xs text-gray-500">
                     {selectedPlayerIds.length} selecionado(s)
@@ -185,7 +194,7 @@ function MatchPage() {
                           <li
                             key={player.id}
                             className={`flex items-center justify-between px-3 py-2 text-sm cursor-pointer ${
-                              isSelected ? "bg-red-50" : "bg-white"
+                              isSelected ? "bg-red-50" : "hover:bg-gray-50"
                             }`}
                             onClick={() => togglePlayerSelection(player.id)}
                           >
@@ -193,11 +202,8 @@ function MatchPage() {
                               <input
                                 type="checkbox"
                                 checked={isSelected}
-                                onChange={() =>
-                                  togglePlayerSelection(player.id)
-                                }
+                                readOnly
                                 className="h-4 w-4 text-red-500 border-gray-300 rounded focus:ring-red-400"
-                                onClick={(e) => e.stopPropagation()}
                               />
                               <span className="font-medium text-gray-800">
                                 {player.name}
@@ -205,7 +211,7 @@ function MatchPage() {
                             </div>
                             <span className="text-xs text-gray-500 flex items-center gap-1">
                               <StarRating value={player.ability} />
-                              <span>
+                              <span className={`${player.position === 'GoalKeeper' ? 'font-bold text-yellow-600' : ''}`}>
                                 •{" "}
                                 {player.position === "GoalKeeper"
                                   ? "Goleiro"
@@ -225,18 +231,14 @@ function MatchPage() {
                   {formError && (
                     <p className="text-sm text-red-600">{formError}</p>
                   )}
-                  {!formError && successMessage && (
-                    <p className="text-sm text-green-600">
-                      {successMessage}
-                    </p>
-                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 transition-colors"
+                  disabled={isLoading}
+                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  Criar partida
+                  {isLoading ? "Sorteando..." : "Sortear Times"}
                 </button>
               </div>
             </form>
