@@ -8,7 +8,7 @@ function AddPlayerModal({ isOpen, onClose, onAdd }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -26,8 +26,7 @@ function AddPlayerModal({ isOpen, onClose, onAdd }) {
       return;
     }
 
-    onAdd({
-      id: crypto.randomUUID(),
+    await onAdd({
       name: name.trim(),
       ability: abilityNumber,
       position,
@@ -50,6 +49,7 @@ function AddPlayerModal({ isOpen, onClose, onAdd }) {
             type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
+            aria-label="Fechar"
           >
             ×
           </button>
@@ -79,7 +79,7 @@ function AddPlayerModal({ isOpen, onClose, onAdd }) {
                 htmlFor="playerAbility"
                 className="mb-1 block text-xs font-medium text-gray-700"
               >
-                Habilidade (1 a 5)
+                Habilidade
               </label>
               <select
                 id="playerAbility"
@@ -87,11 +87,11 @@ function AddPlayerModal({ isOpen, onClose, onAdd }) {
                 onChange={(e) => setAbility(e.target.value)}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
               >
-+                <option value="1">★☆☆☆☆ (1)</option>
-+                <option value="2">★★☆☆☆ (2)</option>
-+                <option value="3">★★★☆☆ (3)</option>
-+                <option value="4">★★★★☆ (4)</option>
-+                <option value="5">★★★★★ (5)</option>
+                <option value="1">★☆☆☆☆ (1)</option>
+                <option value="2">★★☆☆☆ (2)</option>
+                <option value="3">★★★☆☆ (3)</option>
+                <option value="4">★★★★☆ (4)</option>
+                <option value="5">★★★★★ (5)</option>
               </select>
             </div>
 

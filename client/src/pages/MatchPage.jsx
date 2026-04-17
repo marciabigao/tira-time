@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout.jsx";
-import { playersMock } from "../mocks/playersMock.js";
+import StarRating from "../components/StarRating.jsx";
+import { api } from "../services/api.js";
 
 function MatchPage() {
   const [matchName, setMatchName] = useState("");
@@ -14,12 +15,15 @@ function MatchPage() {
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Carregar jogadores do mock ao montar a página
   useEffect(() => {
-    const sorted = [...playersMock].sort((a, b) =>
-      a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
-    );
-    setPlayers(sorted);
+    api.getPlayers()
+      .then(data => {
+        const sorted = [...data].sort((a, b) =>
+          a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+        );
+        setPlayers(sorted);
+      })
+      .catch(err => console.error("Falha ao buscar jogadores:", err));
   }, []);
 
   const togglePlayerSelection = (playerId) => {
@@ -83,7 +87,6 @@ function MatchPage() {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Campos básicos da partida */}
               <div className="space-y-4">
                 <div>
                   <label
@@ -157,11 +160,10 @@ function MatchPage() {
                 </div>
               </div>
 
-              {/* Seção de seleção de jogadores (mock) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-gray-900">
-                    Jogadores da partida (mock)
+                    Jogadores da partida
                   </h2>
                   <span className="text-xs text-gray-500">
                     {selectedPlayerIds.length} selecionado(s)
@@ -171,7 +173,7 @@ function MatchPage() {
                 <div className="border border-gray-200 rounded-md max-h-60 overflow-y-auto">
                   {players.length === 0 ? (
                     <div className="p-3 text-sm text-gray-500">
-                      Nenhum jogador mock encontrado.
+                      Nenhum jogador cadastrado.
                     </div>
                   ) : (
                     <ul className="divide-y divide-gray-100">
@@ -201,11 +203,14 @@ function MatchPage() {
                                 {player.name}
                               </span>
                             </div>
-                            <span className="text-xs text-gray-500">
-                              Habilidade: {player.ability} •{" "}
-                              {player.position === "GoalKeeper"
-                                ? "Goleiro"
-                                : "Linha"}
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <StarRating value={player.ability} />
+                              <span>
+                                •{" "}
+                                {player.position === "GoalKeeper"
+                                  ? "Goleiro"
+                                  : "Linha"}
+                              </span>
                             </span>
                           </li>
                         );
@@ -215,7 +220,6 @@ function MatchPage() {
                 </div>
               </div>
 
-              {/* Mensagem + botão, com distâncias controladas */}
               <div className="flex flex-col space-y-1 mt-4">
                 <div className="min-h-[1.25rem]">
                   {formError && (
@@ -232,7 +236,7 @@ function MatchPage() {
                   type="submit"
                   className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 transition-colors"
                 >
-                  Criar partida (mock)
+                  Criar partida
                 </button>
               </div>
             </form>
