@@ -25,3 +25,11 @@ Histórias de usuário:
 - UH 5: Como usuário, quero ser capaz de sortear os times de uma determinada partida, de forma a equilibrar o nível de habilidade entre eles.
 - UH 6: Como usuário, quero ser capaz de visualizar uma partida após o sorteio, em uma página contendo informações como o nome da partida e os times sorteados, de forma a conferir as informações e o resultado do sorteio. 
 - UH 7: Como usuário, quero ser capaz de baixar um pdf contendo os times sorteados, para que eu possa compartilhar com os demais participantes do jogo. 
+
+Para rodar, na raiz do projeto:
+
+```bash
+npm install
+npm run setup
+npm run dev
+```
