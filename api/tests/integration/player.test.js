@@ -100,3 +100,59 @@ it('Deve listar todos os jogadores cadastrados', async () => {
     const deletedPlayer = await prisma.player.findUnique({ where: { id: player.id } });
     expect(deletedPlayer).toBeNull();
   });
+
+  it('Deve retornar erro ao criar jogador com nome menor que 2 caracteres', async () => {
+    const res = await request(app).post('/players').send({
+      name: 'A', // Inválido
+      ability: 3,
+      position: 'FieldPlayer'
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('Deve retornar erro ao criar jogador com posição inválida', async () => {
+    const res = await request(app).post('/players').send({
+      name: 'Teste Posição',
+      ability: 3,
+      position: 'Zagueiro' // Inválido
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('Deve buscar um jogador específico por ID (GET /players/:id)', async () => {
+    const player = await prisma.player.create({
+      data: { name: 'Busca ID', ability: 4, position: 'GoalKeeper' }
+    });
+
+    const res = await request(app).get(`/players/${player.id}`);
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe('Busca ID');
+  });
+
+  it('Deve retornar 404 ao buscar jogador com ID inexistente', async () => {
+    const res = await request(app).get('/players/id-falso-123');
+    expect(res.status).toBe(404);
+  });
+
+  it('Deve retornar erro 404 ao tentar atualizar jogador inexistente', async () => {
+    const res = await request(app).put('/players/id-falso-123').send({
+      name: 'Fantasma',
+      ability: 3,
+      position: 'FieldPlayer'
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it('Deve retornar erro 404 ao tentar deletar jogador inexistente', async () => {
+    const res = await request(app).delete('/players/id-falso-123');
+    expect(res.status).toBe(404);
+  });
+
+  it('Deve retornar erro 400 ao tentar atualizar com dados inválidos', async () => {
+    const res = await request(app).put('/players/qualquer-id').send({
+      name: 'A', // Inválido (< 2 chars)
+      ability: 10, // Inválido (> 5)
+      position: 'Zagueiro' // Inválido
+    });
+    expect(res.status).toBe(400);
+  });

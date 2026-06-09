@@ -253,6 +253,7 @@ export { app };
 
 const PORT = process.env.PORT || 3000;
 
+/* v8 ignore start */
 // O servidor só "escuta" a porta se não estivermos no ambiente de teste
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, () => {
@@ -294,3 +295,4 @@ process.on('SIGINT', () => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Promise rejection não tratada:', reason);
 });
+/* v8 ignore stop */
