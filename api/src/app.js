@@ -281,18 +281,4 @@ if (process.env.NODE_ENV !== 'test') {
     console.error('Promise rejection não tratada:', reason);
   });
 }
-
-process.on('SIGINT', () => {
-  console.log('\nEncerrando servidor...');
-  server.close(() => {
-    prisma.$disconnect().then(() => {
-      console.log('Servidor encerrado');
-      process.exit(0);
-    });
-  });
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Promise rejection não tratada:', reason);
-});
 /* v8 ignore stop */

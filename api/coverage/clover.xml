@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1781047366157" clover="3.2.0">
-  <project timestamp="1781047366157" name="All files">
+<coverage generated="1781048877975" clover="3.2.0">
+  <project timestamp="1781048877975" name="All files">
     <metrics statements="121" coveredstatements="108" conditionals="57" coveredconditionals="48" methods="20" coveredmethods="20" elements="198" coveredelements="176" complexity="0" loc="121" ncloc="121" packages="1" files="1" classes="1"/>
     <file name="app.js" path="/home/joao-pedro/UFMG/26_1/EDS/TP/tira-time/api/src/app.js">
       <metrics statements="121" coveredstatements="108" conditionals="57" coveredconditionals="48" methods="20" coveredmethods="20"/>
@@ -49,7 +49,7 @@
       <line num="84" count="3" type="cond" truecount="2" falsecount="0"/>
       <line num="85" count="1" type="stmt"/>
       <line num="90" count="2" type="cond" truecount="2" falsecount="0"/>
-      <line num="91" count="4" type="stmt"/>
+      <line num="91" count="3" type="stmt"/>
       <line num="93" count="1" type="stmt"/>
       <line num="94" count="1" type="stmt"/>
       <line num="96" count="1" type="stmt"/>

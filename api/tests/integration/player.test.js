@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../src/app.js';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Limpa o banco antes de tudo
-beforeAll(async () => {
+// Limpa o banco antes de cada teste
+beforeEach(async () => {
   await prisma.player.deleteMany();
 });
 
@@ -42,12 +42,10 @@ describe('Integração: Rotas de Jogadores (/players)', () => {
       });
 
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('A habilidade deve ser um número entre 1 e 5.');
   });
 
-});
-
-it('Deve listar todos os jogadores cadastrados', async () => {
+  it('Deve listar todos os jogadores cadastrados', async () => {
     // Preparação: Insere direto no banco para garantir que há dados
     await prisma.player.create({
       data: { name: 'João Araldi', ability: 5, position: 'FieldPlayer' }
@@ -108,6 +106,7 @@ it('Deve listar todos os jogadores cadastrados', async () => {
       position: 'FieldPlayer'
     });
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('name é obrigatório e deve ter pelo menos 2 caracteres');
   });
 
   it('Deve retornar erro ao criar jogador com posição inválida', async () => {
@@ -117,6 +116,7 @@ it('Deve listar todos os jogadores cadastrados', async () => {
       position: 'Zagueiro' // Inválido
     });
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('A posição deve ser uma das seguintes: GoalKeeper, FieldPlayer.');
   });
 
   it('Deve buscar um jogador específico por ID (GET /players/:id)', async () => {
@@ -132,6 +132,7 @@ it('Deve listar todos os jogadores cadastrados', async () => {
   it('Deve retornar 404 ao buscar jogador com ID inexistente', async () => {
     const res = await request(app).get('/players/id-falso-123');
     expect(res.status).toBe(404);
+    expect(res.body.error).toBe('Jogador não encontrado');
   });
 
   it('Deve retornar erro 404 ao tentar atualizar jogador inexistente', async () => {
@@ -141,11 +142,13 @@ it('Deve listar todos os jogadores cadastrados', async () => {
       position: 'FieldPlayer'
     });
     expect(res.status).toBe(404);
+    expect(res.body.error).toBe('Jogador não encontrado para atualização.');
   });
 
   it('Deve retornar erro 404 ao tentar deletar jogador inexistente', async () => {
     const res = await request(app).delete('/players/id-falso-123');
     expect(res.status).toBe(404);
+    expect(res.body.error).toBe('Jogador não encontrado para exclusão.');
   });
 
   it('Deve retornar erro 400 ao tentar atualizar com dados inválidos', async () => {
@@ -155,4 +158,7 @@ it('Deve listar todos os jogadores cadastrados', async () => {
       position: 'Zagueiro' // Inválido
     });
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('name deve ter pelo menos 2 caracteres');
   });
+
+});

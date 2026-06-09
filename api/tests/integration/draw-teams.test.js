@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../src/app.js';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Limpa o banco antes de tudo
-beforeAll(async () => {
+// Limpa o banco antes de cada teste
+beforeEach(async () => {
   await prisma.player.deleteMany();
 });
 
@@ -29,7 +29,7 @@ describe('Integração: Sorteio de Times (/draw-teams)', () => {
 
     // Verifica erro 400 e a mensagem contendo a regra
     expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/você deve selecionar pelo menos 2 goleiros/);
+    expect(res.body.error).toBe('Para formar 2 times, você deve selecionar pelo menos 2 goleiros. Você selecionou 1.');
   });
 
   it('Deve distribuir exatamente um goleiro por time no sorteio', async () => {
@@ -62,12 +62,12 @@ describe('Integração: Sorteio de Times (/draw-teams)', () => {
     // Tenta sem enviar jogadores
     const res1 = await request(app).post('/draw-teams').send({ playerIds: [], teamsCount: 2 });
     expect(res1.status).toBe(400);
-    expect(res1.body.error).toBeDefined();
+    expect(res1.body.error).toBe('Nenhum jogador selecionado.');
 
     // Tenta com menos de 2 times
     const res2 = await request(app).post('/draw-teams').send({ playerIds: ['id-qualquer'], teamsCount: 1 });
     expect(res2.status).toBe(400);
-    expect(res2.body.error).toBeDefined();
+    expect(res2.body.error).toBe('O número de times deve ser pelo menos 2.');
   });
 
   it('Deve rebaixar goleiros excedentes para jogadores de linha', async () => {
@@ -87,6 +87,7 @@ describe('Integração: Sorteio de Times (/draw-teams)', () => {
     
     // Procura o G3 (que tinha a menor habilidade) e verifica se a API alterou a posição dele para FieldPlayer
     const g3Sorteado = todosJogadores.find(p => p.name === 'G3 (Pior)');
+    expect(g3Sorteado).toBeDefined();
     expect(g3Sorteado.position).toBe('FieldPlayer');
   });
 
