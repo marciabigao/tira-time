@@ -4,6 +4,9 @@ Este documento descreve as suítes de testes automatizados E2E desenvolvidas com
 
 ---
 
+## Para rodar na client: 
+npx cypress open
+
 ## Estrutura das Suítes de Teste
 
 Abaixo estão detalhados os quatro arquivos principais de testes, seus objetivos e as requisições de rede interceptadas.
