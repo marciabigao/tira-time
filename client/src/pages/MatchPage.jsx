@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // 1. Importar useNavigate
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
 import StarRating from "../components/StarRating.jsx";
 import { api } from "../services/api.js";
 
 function MatchPage() {
-  const navigate = useNavigate(); // 2. Inicializar o hook
+  const navigate = useNavigate();
   const [matchName, setMatchName] = useState("");
   const [matchDate, setMatchDate] = useState("");
   const [teamsCount, setTeamsCount] = useState("2");
@@ -15,7 +15,7 @@ function MatchPage() {
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
 
   const [formError, setFormError] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Para feedback no botão
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     api.getPlayers()
@@ -29,7 +29,7 @@ function MatchPage() {
   }, []);
 
   const togglePlayerSelection = (playerId) => {
-    setFormError(""); // Limpa o erro ao interagir
+    setFormError(""); 
     setSelectedPlayerIds((current) =>
       current.includes(playerId)
         ? current.filter((id) => id !== playerId)
@@ -42,7 +42,6 @@ function MatchPage() {
     setFormError("");
     setIsLoading(true);
 
-    // Validações do formulário
     if (!matchName.trim()) {
       setFormError("O nome da partida é obrigatório");
       setIsLoading(false);
@@ -65,7 +64,6 @@ function MatchPage() {
         teamsCount: Number(teamsCount),
       });
 
-      // Navega para a página de resultados, passando os dados via state
       navigate("/teams-result", {
         state: {
           teams: teams,
@@ -78,7 +76,6 @@ function MatchPage() {
       });
 
     } catch (error) {
-      // Exibe o erro da API para o usuário
       setFormError(error.message || "Ocorreu um erro ao sortear os times.");
     } finally {
       setIsLoading(false);
@@ -96,7 +93,6 @@ function MatchPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
-                {/* Campos do formulário (Nome, Data, etc.) - sem alteração */}
                 <div>
                   <label
                     htmlFor="matchName"
@@ -110,6 +106,7 @@ function MatchPage() {
                     value={matchName}
                     onChange={(e) => setMatchName(e.target.value)}
                     placeholder="Ex.: Pelada de sexta"
+                    data-cy="match-name-input"
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400"
                   />
                 </div>
@@ -127,6 +124,7 @@ function MatchPage() {
                       type="date"
                       value={matchDate}
                       onChange={(e) => setMatchDate(e.target.value)}
+                      data-cy="match-date-input"
                       className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400"
                     />
                   </div>
@@ -164,6 +162,7 @@ function MatchPage() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Ex.: Quadra da UFMG"
+                    data-cy="match-location-input"
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400"
                   />
                 </div>
@@ -193,6 +192,7 @@ function MatchPage() {
                         return (
                           <li
                             key={player.id}
+                            data-cy={player.position === "GoalKeeper" ? "player-select-goleiro" : "player-select-linha"}
                             className={`flex items-center justify-between px-3 py-2 text-sm cursor-pointer ${
                               isSelected ? "bg-red-50" : "hover:bg-gray-50"
                             }`}
@@ -229,13 +229,14 @@ function MatchPage() {
               <div className="flex flex-col space-y-1 mt-4">
                 <div className="min-h-[1.25rem]">
                   {formError && (
-                    <p className="text-sm text-red-600">{formError}</p>
+                    <p className="text-sm text-red-600" data-cy="form-error">{formError}</p>
                   )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
+                  data-cy="submit-draw-button"
                   className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Sorteando..." : "Sortear Times"}

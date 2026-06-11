@@ -27,6 +27,7 @@ function DeletePlayerModal({ isOpen, onClose, onConfirm, player }) {
               type="button"
               onClick={onConfirm}
               className="rounded-md bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600"
+              data-cy="confirm-delete-button"
             >
               Excluir
             </button>
