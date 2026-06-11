@@ -248,28 +248,37 @@ app.delete("/players/:id", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-}).on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Porta ${PORT} já está em uso`);
-  } else {
-    console.error('Erro ao iniciar servidor:', err);
-  }
-  process.exit(1);
-});
+// Exporta o app para o framework de testes
+export { app };
 
-process.on('SIGINT', () => {
-  console.log('\nEncerrando servidor...');
-  server.close(() => {
-    prisma.$disconnect().then(() => {
-      console.log('Servidor encerrado');
-      process.exit(0);
+const PORT = process.env.PORT || 3000;
+
+/* v8 ignore start */
+// O servidor só "escuta" a porta se não estivermos no ambiente de teste
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Porta ${PORT} já está em uso`);
+    } else {
+      console.error('Erro ao iniciar servidor:', err);
+    }
+    process.exit(1);
+  });
+
+  process.on('SIGINT', () => {
+    console.log('\nEncerrando servidor...');
+    server.close(() => {
+      prisma.$disconnect().then(() => {
+        console.log('Servidor encerrado');
+        process.exit(0);
+      });
     });
   });
-});
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Promise rejection não tratada:', reason);
-});
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Promise rejection não tratada:', reason);
+  });
+}
+/* v8 ignore stop */
