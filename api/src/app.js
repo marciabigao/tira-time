@@ -1,13 +1,10 @@
 import 'dotenv/config.js';
 import express from 'express';
-import pkg from '@prisma/client';
 import cors from 'cors';
 import PDFDocument from 'pdfkit';
-
-const { PrismaClient } = pkg;
+import prisma from './prismaClient.js';
 
 const app = express();
-const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
