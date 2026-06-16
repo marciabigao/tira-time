@@ -73,6 +73,7 @@ function EditPlayerModal({ isOpen, onClose, onUpdate, player }) {
               onChange={(e) => setName(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
               placeholder="Nome do jogador"
+              data-cy="player-name-input"
             />
           </div>
 
@@ -89,6 +90,7 @@ function EditPlayerModal({ isOpen, onClose, onUpdate, player }) {
                 value={ability}
                 onChange={(e) => setAbility(e.target.value)}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+                data-cy="player-ability-input"
               >
                 <option value="1">★☆☆☆☆ (1)</option>
                 <option value="2">★★☆☆☆ (2)</option>
@@ -110,6 +112,7 @@ function EditPlayerModal({ isOpen, onClose, onUpdate, player }) {
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+                data-cy="player-position-input"
               >
                 <option value="GoalKeeper">Goleiro</option>
                 <option value="FieldPlayer">Linha</option>
@@ -130,6 +133,7 @@ function EditPlayerModal({ isOpen, onClose, onUpdate, player }) {
             <button
               type="submit"
               className="rounded-md bg-red-400 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500"
+              data-cy="submit-player-button"
             >
               Salvar Alterações
             </button>

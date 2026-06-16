@@ -19,7 +19,6 @@ function PlayersPage() {
   const [playerToDelete, setPlayerToDelete] = useState(null);
   const [playerToEdit, setPlayerToEdit] = useState(null);
 
-  // Carrega jogadores da API ao montar
   useEffect(() => {
     api.getPlayers()
       .then(setPlayers)
@@ -99,12 +98,12 @@ function PlayersPage() {
           type="button"
           onClick={() => setIsAddModalOpen(true)}
           className="inline-flex items-center rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
+          data-cy="add-player-button"
         >
           + Adicionar jogador
         </button>
       </div>
 
-      {/* Controles de ordenação */}
       <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
         <span className="text-gray-600">Ordenar por:</span>
         <button
@@ -142,7 +141,6 @@ function PlayersPage() {
         </button>
       </div>
 
-      {/* Lista de jogadores */}
       {players.length === 0 ? (
         <p className="text-sm text-gray-600">
           Nenhum jogador cadastrado.
@@ -153,21 +151,19 @@ function PlayersPage() {
             <PlayerCard
               key={player.id}
               player={player}
-              onEditClick={() => setPlayerToEdit(player)} // <-- ESTA LINHA ESTAVA FALTANDO
+              onEditClick={() => setPlayerToEdit(player)}
               onDeleteClick={() => setPlayerToDelete(player)}
             />
           ))}
         </div>
       )}
 
-      {/* Modal de adicionar jogador */}
       <AddPlayerModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddPlayer}
       />
 
-      {/* Modal de edição de jogador */}
       <EditPlayerModal
         isOpen={!!playerToEdit}
         onClose={() => setPlayerToEdit(null)}
@@ -175,7 +171,6 @@ function PlayersPage() {
         player={playerToEdit}
       />
 
-      {/* Modal de exclusão de jogador */}
       <DeletePlayerModal
         isOpen={!!playerToDelete}
         player={playerToDelete}

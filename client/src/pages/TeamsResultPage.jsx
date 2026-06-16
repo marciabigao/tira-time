@@ -25,7 +25,6 @@ function TeamsResultPage() {
       a.remove();
     } catch (error) {
       console.error("Falha ao baixar PDF:", error);
-      // Opcional: mostrar um erro para o usuário
     } finally {
       setIsDownloading(false);
     }
@@ -64,7 +63,7 @@ function TeamsResultPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {teams.map((team, index) => (
-            <div key={index} className={`rounded-lg shadow-md overflow-hidden ${teamColors[index % teamColors.length]}`}>
+            <div key={index} data-cy="team-card" className={`rounded-lg shadow-md overflow-hidden ${teamColors[index % teamColors.length]}`}>
               <div className={`p-3 ${teamTextColors[index % teamTextColors.length]}`}>
                 <h2 className="text-xl font-bold">{teamNames[index % teamNames.length]}</h2>
                 <p className="text-sm font-medium">Habilidade Total: {team.totalAbility}</p>
@@ -99,6 +98,7 @@ function TeamsResultPage() {
             <button
                 onClick={handleDownloadPdf}
                 disabled={isDownloading}
+                data-cy="download-pdf-button"
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-blue-500 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-600 disabled:bg-gray-400"
             >
               {isDownloading ? "Baixando..." : "Baixar PDF"}
