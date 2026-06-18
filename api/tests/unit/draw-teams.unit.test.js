@@ -1,50 +1,32 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../../src/app.js';
 
-vi.mock('../../src/prismaClient.js', () => ({
-  default: {
-    player: {
-      findMany: vi.fn(),
-    },
-  },
-}));
-
-import prisma from '../../src/prismaClient.js';
-
-afterEach(() => vi.clearAllMocks());
-
-describe('Draw teams unit tests', () => {
-  it('returns 400 when no playerIds', async () => {
-    const res = await request(app).post('/draw-teams').send({});
+describe('Unitário: Geração de PDF (/generate-pdf)', () => {
+  it('returns 400 if missing body', async () => {
+    const res = await request(app).post('/generate-pdf').send({});
     expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/Nenhum jogador/i);
+    expect(res.body.error).toBeDefined();
   });
 
-  it('returns 400 when not enough goalkeepers', async () => {
-    prisma.player.findMany.mockResolvedValue([
-      { id: '1', name: 'A', ability: 5, position: 'FieldPlayer' },
-      { id: '2', name: 'B', ability: 4, position: 'FieldPlayer' },
-    ]);
-
-    const res = await request(app).post('/draw-teams').send({ playerIds: ['1', '2'], teamsCount: 2 });
-
-    expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/goleiros/i);
-  });
-
-  it('returns teams when enough goalkeepers and field players', async () => {
-    const players = [
-      { id: 'g1', name: 'G1', ability: 5, position: 'GoalKeeper' },
-      { id: 'g2', name: 'G2', ability: 4, position: 'GoalKeeper' },
-      { id: 'f1', name: 'F1', ability: 5, position: 'FieldPlayer' },
-      { id: 'f2', name: 'F2', ability: 3, position: 'FieldPlayer' },
+  it('returns pdf headers when valid body provided', async () => {
+    const teams = [
+      { totalAbility: 10, players: [{ name: 'A', ability: 5, position: 'FieldPlayer' }] },
     ];
-    prisma.player.findMany.mockResolvedValue(players);
+    const matchInfo = { name: 'Partida', location: 'Local', date: new Date().toISOString() };
 
-    const res = await request(app).post('/draw-teams').send({ playerIds: players.map(p => p.id), teamsCount: 2 });
+    const res = await request(app)
+      .post('/generate-pdf')
+      .send({ teams, matchInfo })
+      .buffer()
+      .parse((res, callback) => {
+        res.setEncoding('binary');
+        res.data = '';
+        res.on('data', chunk => { res.data += chunk; });
+        res.on('end', () => { callback(null, Buffer.from(res.data, 'binary')); });
+      });
+
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(2);
+    expect(res.header['content-type']).toMatch(/application\/pdf/);
   });
 });

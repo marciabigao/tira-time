@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../../src/app.js';
 
@@ -16,11 +16,11 @@ vi.mock('../../src/prismaClient.js', () => ({
 
 import prisma from '../../src/prismaClient.js';
 
-afterEach(() => {
+beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('Players unit tests', () => {
+describe('Unitário: Jogadores', () => {
   it('POST /players returns 400 for short name', async () => {
     const res = await request(app).post('/players').send({ name: 'A', ability: 3, position: 'FieldPlayer' });
     expect(res.status).toBe(400);
@@ -68,7 +68,7 @@ describe('Players unit tests', () => {
     const err = new Error('not found');
     err.code = 'P2025';
     prisma.player.update.mockRejectedValue(err);
-    const res = await request(app).put('/players/unknown').send({ name: 'X', ability: 3, position: 'FieldPlayer' });
+    const res = await request(app).put('/players/unknown').send({ name: 'Jogador', ability: 3, position: 'FieldPlayer' });
     expect(res.status).toBe(404);
   });
 
