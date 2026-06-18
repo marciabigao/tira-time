@@ -5,7 +5,10 @@ function PlayerCard({ player, onDeleteClick, onEditClick }) {
     player.position === "GoalKeeper" ? "Goleiro" : "Linha";
 
   return (
-    <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm">
+    <div
+      className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm"
+      data-cy="player-list-item"
+    >
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 text-sm">
           {player.name}
@@ -21,6 +24,7 @@ function PlayerCard({ player, onDeleteClick, onEditClick }) {
           onClick={onEditClick}
           className="rounded-full p-1 text-gray-400 hover:bg-blue-50 hover:text-blue-500"
           aria-label={`Editar ${player.name}`}
+          data-cy="edit-player-button"
         >
           {/* Ícone de lápis (SVG) */}
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -33,6 +37,7 @@ function PlayerCard({ player, onDeleteClick, onEditClick }) {
           onClick={onDeleteClick}
           className="ml-1 rounded-full p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
           aria-label={`Excluir ${player.name}`}
+          data-cy="delete-player-button"
         >
           {/* Ícone de lixeira (SVG) */}
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
