@@ -1,4 +1,15 @@
+import { createPlayers, clearPlayers } from '../support/playerSeed';
+
 describe('Team Draw - Validation', () => {
+
+    before(() => {
+    createPlayers();
+    });
+
+    after(() => {
+    clearPlayers();
+    });
+
     it('should show an error if not enough goalkeepers are selected', () => {
       cy.visit('/match');
   

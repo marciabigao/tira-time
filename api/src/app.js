@@ -245,6 +245,12 @@ app.delete("/players/:id", async (req, res) => {
   }
 });
 
+app.delete('/test/reset', async (req, res) => {
+  await prisma.player.deleteMany();
+  res.sendStatus(204);
+});
+
+
 // Exporta o app para o framework de testes
 export { app };
 

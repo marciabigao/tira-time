@@ -1,4 +1,15 @@
+import { createPlayers, clearPlayers } from '../support/playerSeed';
+
 describe('PDF Download', () => {
+
+    before(() => {
+    createPlayers();
+    });
+
+    after(() => {
+    clearPlayers();
+    });
+
     it('should trigger a request to the PDF generation endpoint after a valid draw', () => {
       // Interceptar as chamadas de API (removido o /api/)
       cy.intercept('POST', '**/draw-teams').as('drawTeams');
