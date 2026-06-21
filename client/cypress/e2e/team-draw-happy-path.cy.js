@@ -1,4 +1,15 @@
+import { createPlayers, clearPlayers } from '../support/playerSeed';
+
 describe('Team Draw - Happy Path', () => {
+
+    before(() => {
+    createPlayers();
+    });
+
+    after(() => {
+    clearPlayers();
+    });
+
     it('should successfully draw teams by selecting existing players from the UI', () => {
       // Intercepta a chamada de sorteio (removido o /api/)
       cy.intercept('POST', '**/draw-teams').as('drawTeams');
